@@ -4,7 +4,7 @@ import time
 from pprint import pprint
 from requests import Session
 
-from api.bboxes import rescale_bbox, bbox_to_mm_max
+from api.bboxes import *
 # from .yolov5.models.common import DetectMultiBackend
 from yolov5.utils.torch_utils import select_device
 from yolov5 import predict
@@ -22,8 +22,11 @@ def predict_bboxes(image_id: str):
     st = time.time()
     preds = predict.run(r"./api/assets/THE_BEST.pt", path.join(BASE_PATH, image_id), conf_thres=0.5)
     result = []
+    intersection_points = []
     for bbox, conf in preds:
         x, y, w, h = rescale_bbox(bbox)
+        if y < Y_MID_POINT and y + h > Y_MID_POINT:
+            intersection_points.append((x, x + w))
         result.append({
             "x": x,
             "y": y,
@@ -31,7 +34,8 @@ def predict_bboxes(image_id: str):
             "height": h,
             "max_mm": bbox_to_mm_max((x, y, w, h))
         })
-    return {"bboxes": result, "time": time.time() - st}
+    fullness = get_fullness(intersection_points)
+    return {"bboxes": result, "fullness": fullness, "time": time.time() - st}
 
 
 if __name__ == "__main__":

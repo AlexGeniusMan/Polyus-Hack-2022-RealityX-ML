@@ -13,6 +13,9 @@ LINE_HIGH = (720, 350)
 LOWER_RATIO = ((LINE_LOW[0]-LINE_LOW[1])-(LINE_MID[0]-LINE_MID[1])) / (Y_LOW_POINT-Y_MID_POINT)
 HIGHER_RATIO = ((LINE_MID[0]-LINE_MID[1])-(LINE_HIGH[0]-LINE_HIGH[1])) / (Y_MID_POINT-Y_HIGH_POINT)
 
+TOLERANCE = 50
+
+
 def rescale_bbox(bbox):
     x, y, w, h = bbox
     im_w, im_h = SIZE
@@ -38,3 +41,20 @@ def bbox_to_mm_max(bbox):
         new_w = w / local_belt_w * REAL_LEN
         new_h = h / w * new_w * HIGHER_RATIO
     return max(new_w, new_h)
+
+
+def fuse(intersections: list):
+    fused = [intersections[0]]
+    intersections = intersections[1:]
+    for intersec in intersections:
+        if fused[-1][1] >= intersec[0]:
+            fused[-1] = (min(fused[-1][0], intersec[0]), max(fused[-1][1], intersec[1]))
+        else:
+            fused.append(intersec)
+    return fused
+
+def get_fullness(intersection_points):
+    intersection_points.sort(key=lambda x: x[0])
+    intersection_points = fuse(intersection_points)
+    fullness = sum([x[1] - x[0] for x in intersection_points]) / (LINE_MID[0] - LINE_MID[1] - TOLERANCE * 2)
+    return fullness
