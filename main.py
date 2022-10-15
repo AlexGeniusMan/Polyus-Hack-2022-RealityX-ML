@@ -7,7 +7,7 @@ from requests import Session
 from api.bboxes import *
 # from .yolov5.models.common import DetectMultiBackend
 from yolov5.utils.torch_utils import select_device
-from yolov5 import predict
+from yolov5.predict import Predictor
 
 # MODEL = DetectMultiBackend(r"api/assets/THE_BEST.pt", device=select_device(""),
 #                            dnn=False, data=None, fp16=False)
@@ -17,10 +17,10 @@ BASE_URL = 'http://backend:8080/api/app/frame'
 BASE_PATH = "./frames"
 
 
-def predict_bboxes(image_id: str):
+def predict_bboxes(image_id: str, predictor: Predictor):
     print(select_device(""))
     st = time.time()
-    preds = predict.run(r"./api/assets/THE_BEST.pt", path.join(BASE_PATH, image_id), conf_thres=0.5)
+    preds = predictor.run(path.join(BASE_PATH, image_id), conf_thres=0.5)
     result = []
     intersection_points = []
     for bbox, conf in preds:
@@ -40,6 +40,7 @@ def predict_bboxes(image_id: str):
 
 if __name__ == "__main__":
     requests_module = Session()
+    predictor = Predictor(r"./api/assets/THE_BEST.pt")
     while True:
         try:
             print(datetime.datetime.now(), 'Getting image...')
@@ -54,7 +55,7 @@ if __name__ == "__main__":
                 continue
 
             print(datetime.datetime.now(), 'Processing image...')
-            data = predict_bboxes(image_id + '.jpg')
+            data = predict_bboxes(image_id + '.jpg', predictor=predictor)
             print(datetime.datetime.now(), f"Processed.")
 
             print(datetime.datetime.now(), 'Sending image...')
