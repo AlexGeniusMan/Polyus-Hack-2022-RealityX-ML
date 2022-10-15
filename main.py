@@ -4,7 +4,7 @@ import time
 from pprint import pprint
 from requests import Session
 
-from bboxes import rescale_bbox
+from api.bboxes import rescale_bbox
 # from .yolov5.models.common import DetectMultiBackend
 from yolov5.utils.torch_utils import select_device
 from yolov5 import predict
