@@ -26,6 +26,7 @@ Usage - formats:
 """
 
 import os
+from pickle import NONE
 import sys
 from pathlib import Path
 
@@ -36,6 +37,7 @@ ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
 ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+MODEL = NONE
 
 from yolov5.models.common import DetectMultiBackend
 from utils.dataloaders import LoadImages
@@ -54,7 +56,10 @@ def run(
     source = str(source)
 
     device = select_device(device)
-    model = DetectMultiBackend(model, device=device, dnn=False, data=None, fp16=False)
+    if MODEL is None:
+        model = DetectMultiBackend(model, device=device, dnn=False, data=None, fp16=False)
+    else:
+        model = MODEL
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
