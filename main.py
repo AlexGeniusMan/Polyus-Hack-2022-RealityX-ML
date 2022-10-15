@@ -13,14 +13,14 @@ from yolov5 import predict
 #                            dnn=False, data=None, fp16=False)
 
 
-BASE_URL = 'http://localhost:8020/api/app/frame'
-BASE_PATH = "../frames"
+BASE_URL = 'http://backend:8080/api/app/frame'
+BASE_PATH = "./frames"
 
 
 def predict_bboxes(image_id: str):
     print(select_device(""))
     st = time.time()
-    preds = predict.run(r"../api/assets/THE_BEST.pt", path.join(BASE_PATH, image_id), conf_thres=0.5)
+    preds = predict.run(r"./api/assets/THE_BEST.pt", path.join(BASE_PATH, image_id), conf_thres=0.5)
     result = []
     for bbox, conf in preds:
         x, y, w, h = rescale_bbox(bbox)
@@ -35,21 +35,31 @@ def predict_bboxes(image_id: str):
 
 if __name__ == "__main__":
     requests_module = Session()
-    print(datetime.datetime.now(), 'Getting image...')
-    r = requests_module.get(BASE_URL)
-    image = r.json().get('image')
-    # image_id = str(r.json().get('id'))
-    image_id = 'test.jpg'
-    print(datetime.datetime.now(), f"Got: {image_id}.")
+    while True:
+        try:
+            print(datetime.datetime.now(), 'Getting image...')
+            r = requests_module.get(BASE_URL)
+            image = r.json().get('image')
+            image_id = str(r.json().get('id'))
+            # image_id = 'test.jpg'
+            print(datetime.datetime.now(), f"Got: {image_id}.")
 
-    print(datetime.datetime.now(), 'Processing image...')
-    data = predict_bboxes(image_id)
-    print(datetime.datetime.now(), f"Processed.")
+            if image_id == '0':
+                print(datetime.datetime.now(), 'No frames to process.')
+                continue
 
-    print(datetime.datetime.now(), 'Sending image...')
-    data['id'] = image_id
-    pprint(data)
-    # r2 = requests_module.post(BASE_URL, data=data)
-    print(datetime.datetime.now(), 'Sent.')
+            print(datetime.datetime.now(), 'Processing image...')
+            data = predict_bboxes(image_id + '.jpg')
+            print(datetime.datetime.now(), f"Processed.")
 
-    print('---')
+            print(datetime.datetime.now(), 'Sending image...')
+            data['id'] = image_id
+            pprint(data)
+            r2 = requests_module.post(BASE_URL, data=data)
+            print(datetime.datetime.now(), 'Sent.')
+
+            print('---')
+        except Exception as e:
+            print(e)
+            print('---')
+            time.sleep(3)
