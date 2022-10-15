@@ -4,7 +4,7 @@ import time
 from pprint import pprint
 from requests import Session
 
-from api.bboxes import rescale_bbox
+from api.bboxes import rescale_bbox, bbox_to_mm_max
 # from .yolov5.models.common import DetectMultiBackend
 from yolov5.utils.torch_utils import select_device
 from yolov5 import predict
@@ -29,6 +29,7 @@ def predict_bboxes(image_id: str):
             "y": y,
             "width": w,
             "height": h,
+            "max_mm": bbox_to_mm_max((x, y, w, h))
         })
     return {"bboxes": result, "time": time.time() - st}
 
