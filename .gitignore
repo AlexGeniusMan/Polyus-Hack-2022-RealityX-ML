@@ -155,3 +155,7 @@ tmp/
 full_dataset_val/
 public/
 yolo_dataset/
+only_train/
+yolo_dataset_full/
+our_annotation.json
+yolov5*.pt
