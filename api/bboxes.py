@@ -54,7 +54,14 @@ def fuse(intersections: list):
     return fused
 
 def get_fullness(intersection_points):
-    intersection_points.sort(key=lambda x: x[0])
-    intersection_points = fuse(intersection_points)
-    fullness = sum([x[1] - x[0] for x in intersection_points]) / (LINE_MID[0] - LINE_MID[1] - TOLERANCE * 2)
-    return fullness
+    if len(intersection_points) > 1:
+        intersection_points.sort(key=lambda x: x[0])
+        intersection_points = fuse(intersection_points)
+        fullness = sum([x[1] - x[0] for x in intersection_points]) / (LINE_MID[0] - LINE_MID[1] - TOLERANCE * 2)
+        return fullness
+    elif len(intersection_points) == 1:
+        fullness = sum([x[1] - x[0] for x in intersection_points]) / (LINE_MID[0] - LINE_MID[1] - TOLERANCE * 2)
+        return fullness
+    else:
+        return 0
+
